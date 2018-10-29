@@ -12,17 +12,18 @@ public class CoordUtil {
     public static final double RADIANS = 57.2957795;
     public static final double DEGREE_TO_RADIANS = 0.01745329252;
 
-    public Point3D LL2XY(Point3D point) {
+    public static Point3D LL2XY(Point3D point) {
 
-        Point3D result;
-        double xx = 0, yy = 0, r = 0;
+        final int mapWidth = 200;
+        final int mapHeight = 100;
 
-        xx = (point.getX() - reference.getX()) * metersDegLon(reference.getX());
-        yy = (point.getY() - reference.getY()) * metersDegLat(reference.getY());
+        double xx = 0, yy = 0, cache = 0, r = 0;
 
-        r = Math.sqrt(xx * xx + yy * yy);
+        cache = Math.log(Math.tan(PI / 4) + (((point.getY() * PI) / 180) / 2));
+        xx = (point.getX() + 180) * (mapWidth / 360);
+        yy = (mapHeight / 2) - (mapWidth * cache / (2 * PI));
 
-        return point;
+        return new Point3D(xx, yy, point.getZ());
 
     }
 
@@ -34,6 +35,17 @@ public class CoordUtil {
     public double metersDegLat(double degree) {
         final double radians = degreeToRadians(degree);
         return (111132.09 - (566.05 * Math.cos(2.0 * radians))+ (1.20 * Math.cos(4.0 * radians)) - (0.002 * Math.cos(6.0 * radians)));
+    }
+
+    public static double getDistance(Point3D abeja1, Point3D abeja2){
+        return Math.sqrt(Math.pow((abeja1.getX() - abeja2.getX())*111111,2) +
+                Math.pow((abeja1.getY() - abeja2.getY())*111111,2) +
+                Math.pow(abeja1.getZ() - abeja2.getZ(),2)
+        );
+    }
+
+    public static org.fxyz3d.geometry.Point3D convertPoint3D(Point3D point) {
+        return new org.fxyz3d.geometry.Point3D((float) point.getX(), (float) point.getY(), (float) point.getZ());
     }
 
     public double degreeToRadians(double degree) {

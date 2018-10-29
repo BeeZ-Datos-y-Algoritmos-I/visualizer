@@ -1,56 +1,94 @@
 package scene;
 
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.geometry.Point3D;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.scene.*;
-import javafx.scene.Cursor;
+import javafx.scene.control.Label;
 import javafx.scene.input.*;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.*;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Transform;
-import javafx.scene.transform.Translate;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
+import org.fxyz3d.geometry.Point3D;
+import org.fxyz3d.shapes.composites.PolyLine3D;
+import org.fxyz3d.utils.CameraTransformer;
 import scene.bee.Bee;
-import scene.bee.BeeModel;
+import scene.zoom.AnimatedZoomOperator;
+import util.CoordUtil;
 
-import java.awt.*;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 public class VisualizerScene extends Application {
 
+    private static int moveSpeed = 1;
+    private static boolean freeZoom = false;
+
+    private static LinkedList<PolyLine3D> linkedlines = new LinkedList<PolyLine3D>();
     private static LinkedList<Bee> bees;
 
-    private static final float WIDTH = 1400;
-    private static final float HEIGHT = 800;
+    private Group root;
+    private SmartGroup group;
 
-    private double anchorX, anchorY;
-    private double anchorAngleX = 0;
-    private double anchorAngleY = 0;
+    private final StringProperty distance = new SimpleStringProperty("Distance: 0.0 meters");
+    private final StringProperty bee1info = new SimpleStringProperty("Bee 1: [0,0 - 0,0 - 0,0]");
+    private final StringProperty bee2info = new SimpleStringProperty("Bee 2: [0,0 - 0,0 - 0,0]");
+
     private final DoubleProperty angleX = new SimpleDoubleProperty(0);
     private final DoubleProperty angleY = new SimpleDoubleProperty(0);
-
-    private boolean cam_mode = false;
 
     @Override
     public void start(Stage stage) {
 
-        final Group root = new Group();
-        final SmartGroup group = new SmartGroup();
+        final AnchorPane ui2d = new AnchorPane();
+        final VBox vbox = new VBox();
+
+        final Label distanceLabel = new Label(distance.getValue());
+        final Label bee1infoLabel = new Label(bee1info.getValue());
+        final Label bee2infoLabel = new Label(bee2info.getValue());
+
+        ui2d.setFocusTraversable(true);
+
+        distanceLabel.setFont(new Font("Arial", 9));
+        bee1infoLabel.setFont(new Font("Arial", 9));
+        bee2infoLabel.setFont(new Font("Arial", 9));
+
+        vbox.getChildren().addAll(distanceLabel, bee1infoLabel, bee2infoLabel);
+        ui2d.getChildren().add(vbox);
+
+        distance.addListener(e -> {
+            distanceLabel.setText(distance.getValue());
+        });
+
+        bee1info.addListener(e -> {
+            bee1infoLabel.setText(bee1info.getValue());
+        });
+
+        bee2info.addListener(e -> {
+            bee2infoLabel.setText(bee2info.getValue());
+        });
+
+        root = new Group();
+        group = new SmartGroup();
 
         final AmbientLight light = new AmbientLight();
         light.setColor(Color.WHITE);
 
         final PerspectiveCamera cam = new PerspectiveCamera();
-        cam.setFieldOfView(20);
-        cam.setFarClip(10000);
-        cam.setNearClip(0.01);
+
+        CameraTransformer cameraTransform = new CameraTransformer();
+        cameraTransform.getChildren().add(cam);
 
         final Box floor = new Box(500, 500, 1);
         floor.setTranslateX(200);
@@ -65,15 +103,32 @@ public class VisualizerScene extends Application {
         root.getChildren().add(rectangle);
 
         root.getChildren().add(light);
+        group.getChildren().add(root);
 
-        final Scene scene = new Scene(group, 800, 600, true);
+        final Scene scene = new Scene(ui2d, 800, 600, false, SceneAntialiasing.BALANCED);
         scene.setFill(Color.SKYBLUE);
-        scene.setCamera(cam);
+
+        SubScene sub = new SubScene(group,1024,768,false,SceneAntialiasing.BALANCED);
+        sub.setCamera(cam);
+        ui2d.getChildren().add(sub);
 
         for (Bee bee : bees) {
 
+            bee.setVisualizer(this);
+
             group.getChildren().add(bee.getModel().getMesh());
             bee.attach();
+
+            List<Point3D> points = new ArrayList<>();
+
+            points.add(CoordUtil.convertPoint3D(bee.getEarthPosition()));
+            points.add(CoordUtil.convertPoint3D(bee.getXYZPosition()));
+
+            PolyLine3D line = new PolyLine3D(points, 80F, Color.LIMEGREEN);
+            line.setVisible(false);
+
+            linkedlines.add(line);
+            root.getChildren().add(line);
 
             cam.setTranslateX(bee.getModel().getMesh().getTranslateX());
             cam.setTranslateY(bee.getModel().getMesh().getTranslateY());
@@ -93,24 +148,48 @@ public class VisualizerScene extends Application {
 
         stage.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
             switch (event.getCode()) {
-                case W:
-                    group.translateZProperty().set(group.getTranslateZ() + 100);
-                    break;
-                case S:
-                    group.translateZProperty().set(group.getTranslateZ() - 100);
-                    break;
+                case H:
+                    for(Bee bee : bees) {
+
+                        cam.setTranslateX(bee.getModel().getMesh().getTranslateX() + scene.getWidth());
+                        cam.setTranslateY(bee.getModel().getMesh().getTranslateY() - scene.getHeight());
+                        cam.setTranslateZ(bee.getModel().getMesh().getTranslateZ());
+                        break;
+
+                    }
+
                 case Q:
-                    group.rotateByX(10);
+                    group.translateZProperty().set(group.getTranslateZ() + 25);
                     break;
                 case E:
-                    group.rotateByX(-10);
+                    group.translateZProperty().set(group.getTranslateZ() - 25);
                     break;
-                case T:
-                    group.rotateByY(10);
+                case W:
+                    group.rotateByX(0.0001 * moveSpeed);
                     break;
-                case R:
-                    group.rotateByY(-10);
+                case S:
+                    group.rotateByX(-0.0001 * moveSpeed);
                     break;
+                case A:
+                    group.rotateByY(-0.0001 * moveSpeed);
+                    break;
+                case D:
+                    group.rotateByY(0.0001 * moveSpeed);
+                    break;
+                case N:
+                    moveSpeed -= 1;
+                    break;
+                case M:
+                    moveSpeed += 1;
+                    break;
+                case V:
+                    freeZoom = !freeZoom;
+                    break;
+                case C:
+                    for(PolyLine3D line : linkedlines)
+                        line.setVisible(!line.isVisible());
+                    break;
+
             }
         });
 
@@ -400,7 +479,7 @@ public class VisualizerScene extends Application {
         xRotate.angleProperty().bind(angleX);
         yRotate.angleProperty().bind(angleY);
 
-
+/*
         scene.setOnMousePressed(event -> {
             anchorX = event.getSceneX();
             anchorY = event.getSceneY();
@@ -411,12 +490,30 @@ public class VisualizerScene extends Application {
         scene.setOnMouseDragged(event -> {
             angleX.set(anchorAngleX - (anchorY - event.getSceneY()));
             angleY.set(anchorAngleY + anchorX - event.getSceneX());
-        });
+        });*/
 
+
+        AnimatedZoomOperator zoomOperator = new AnimatedZoomOperator();
 
         stage.addEventHandler(ScrollEvent.SCROLL, event -> {
-            double movement = event.getDeltaY();
-            group.translateZProperty().set(group.getTranslateZ() + movement);
+
+            if(freeZoom == false) {
+
+                double movement = event.getDeltaY() * moveSpeed;
+                group.translateZProperty().set(group.getTranslateZ() + -movement);
+                return;
+
+            }
+
+            double zoomFactor = 1.5 * moveSpeed;
+
+            if (event.getDeltaY() <= 0) {
+                zoomFactor = 1 / zoomFactor;
+            }
+
+            zoomOperator.zoom(group, zoomFactor, event.getSceneX(), event.getSceneY());
+
+
         });
     }
 
@@ -425,20 +522,36 @@ public class VisualizerScene extends Application {
         Rotate r;
         Transform t = new Rotate();
 
-        void rotateByX(int ang) {
+        void rotateByX(double ang) {
             r = new Rotate(ang, Rotate.X_AXIS);
             t = t.createConcatenation(r);
             this.getTransforms().clear();
             this.getTransforms().addAll(t);
         }
 
-        void rotateByY(int ang) {
+        void rotateByY(double ang) {
             r = new Rotate(ang, Rotate.Y_AXIS);
             t = t.createConcatenation(r);
             this.getTransforms().clear();
             this.getTransforms().addAll(t);
         }
 
+    }
+
+    public void add3DObject(Node node) {
+        root.getChildren().add(node);
+    }
+
+    public StringProperty getDistanceProperty() {
+        return distance;
+    }
+
+    public StringProperty getBee1InfoProperty() {
+        return bee1info;
+    }
+
+    public StringProperty getBee2InfoProperty() {
+        return bee2info;
     }
 
     //main method
