@@ -13,16 +13,18 @@ import util.CoordinateConversions;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class Bee {
+
+    public static final PhongMaterial material = new PhongMaterial(new Color(0.0f, 0.54509807f, 0.54509807f, 0.5));
+    public static final PhongMaterial collisionMaterial = new PhongMaterial(new Color(1.0f, 0.27058825f, 0.0f, 0.5));
 
     public static final DecimalFormatSymbols formatsymbol = DecimalFormatSymbols.getInstance();
     public static final DecimalFormat format = new DecimalFormat("#.0000000", formatsymbol);
 
     public static LinkedList<Bee> linkedbees = new LinkedList<Bee>();
+    public static Map<Sphere, Bee> spheres = new HashMap<Sphere, Bee>();
     public static PolyLine3D lineBee;
 
     private Sphere sphere;
@@ -50,6 +52,13 @@ public class Bee {
         this.model = BeeModel.generate();
         this.model.applyDefault();
 
+        this.sphere = new Sphere();
+        this.sphere.setRadius(100.0);
+        this.sphere.setMaterial(material);
+        this.sphere.setVisible(false);
+
+        spheres.put(sphere, this);
+
     }
 
     public void attach() {
@@ -71,12 +80,8 @@ public class Bee {
 
                     bee.model.applyDefault();
 
-                    if (bee.sphere != null) {
-
+                    if (bee.sphere != null)
                         bee.sphere.setVisible(false);
-                        bee.sphere = null;
-
-                    }
 
                 }
 
@@ -92,6 +97,7 @@ public class Bee {
 
             linkedbees.add(this);
             this.model.applySelection();
+            this.sphere.setVisible(true);
 
             if(linkedbees.size() == 2) {
 
@@ -108,7 +114,6 @@ public class Bee {
 
                 visualizer.add3DObject(lineBee);
                 updateBeeInfo();
-                showSpheres();
 
             }
 
@@ -136,7 +141,11 @@ public class Bee {
         this.model.getMesh().setTranslateY(xyzPosition.getY());
         this.model.getMesh().setTranslateZ(xyzPosition.getZ());
 
-        System.out.println(earthPosition);
+        this.sphere.setTranslateX(this.getXYZPosition().getX());
+        this.sphere.setTranslateY(this.getXYZPosition().getY());
+        this.sphere.setTranslateZ(this.getXYZPosition().getZ());
+
+        visualizer.add3DObject(this.sphere);
 
     }
 
@@ -155,26 +164,6 @@ public class Bee {
                                                                  + format.format(linkedbees.get(1).earthPosition.getZ()) + "]");
         else
             visualizer.getBee2InfoProperty().setValue("Bee 2: [0.0, 0.0, 0.0]");
-
-    }
-
-    public void showSpheres() {
-
-        for(Bee bee : linkedbees) {
-
-            PhongMaterial material = new PhongMaterial(new Color(0.0f, 0.54509807f, 0.54509807f, 0.5));
-
-            bee.sphere = new Sphere();
-            bee.sphere.setRadius(100.0);
-            bee.sphere.setMaterial(material);
-
-            bee.sphere.setTranslateX(bee.getXYZPosition().getX());
-            bee.sphere.setTranslateY(bee.getXYZPosition().getY());
-            bee.sphere.setTranslateZ(bee.getXYZPosition().getZ());
-
-            visualizer.add3DObject(bee.sphere);
-
-        }
 
     }
 
