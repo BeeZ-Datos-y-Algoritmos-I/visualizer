@@ -24,7 +24,7 @@ public class VisualizerMain extends Application {
     public void start(Stage primaryStage) throws Exception {
 
         VisualizerScene scene = new VisualizerScene();
-        AnchorPane pane = scene.craft();
+        AnchorPane pane = scene.craft(400, 400);
 
         scene.loadBees(Console.bees);
 

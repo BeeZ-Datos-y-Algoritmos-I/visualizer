@@ -17,7 +17,6 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Transform;
-import javafx.stage.Stage;
 import org.fxyz3d.geometry.Point3D;
 import org.fxyz3d.shapes.composites.PolyLine3D;
 import org.fxyz3d.utils.CameraTransformer;
@@ -49,7 +48,7 @@ public class VisualizerScene {
     private AnchorPane result;
     private PerspectiveCamera cam;
 
-    public AnchorPane craft() {
+    public AnchorPane craft(int width, int height) {
 
         result = new AnchorPane();
 
@@ -107,9 +106,9 @@ public class VisualizerScene {
         root.getChildren().add(light);
         group.getChildren().add(root);
 
-        result.setMaxSize(800, 600);
-        result.setMinSize(800, 600);
-        result.setPrefSize(800, 600);
+        result.setMaxSize(width, height);
+        result.setMinSize(width, height);
+        result.setPrefSize(width, height);
 
         result.getChildren().add(ui2d);
 
