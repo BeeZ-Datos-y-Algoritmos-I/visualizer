@@ -1,15 +1,14 @@
-package scene.bee;
+package io.beez.visualizer.scene.bee;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.geometry.Point3D;
-import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
 import org.fxyz3d.shapes.composites.PolyLine3D;
-import scene.VisualizerScene;
-import util.CoordUtil;
-import util.CoordinateConversions;
+import io.beez.visualizer.scene.VisualizerScene;
+import io.beez.visualizer.util.CoordUtil;
+import io.beez.visualizer.util.CoordinateConversions;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;

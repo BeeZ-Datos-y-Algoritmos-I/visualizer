@@ -1,4 +1,4 @@
-package scene.bee;
+package io.beez.visualizer.scene.bee;
 
 import javafx.scene.paint.PhongMaterial;
 

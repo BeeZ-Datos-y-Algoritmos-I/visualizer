@@ -1,4 +1,4 @@
-package scene.zoom;
+package io.beez.visualizer.scene.zoom;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;

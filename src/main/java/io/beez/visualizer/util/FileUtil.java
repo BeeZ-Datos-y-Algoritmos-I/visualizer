@@ -1,4 +1,4 @@
-package util;
+package io.beez.visualizer.util;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;

@@ -1,10 +1,12 @@
-import console.Console;
+package io.beez.visualizer;
+
+import io.beez.visualizer.console.Console;
 import javafx.application.Application;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import scene.VisualizerScene;
+import io.beez.visualizer.scene.VisualizerScene;
 
 import java.io.IOException;
 

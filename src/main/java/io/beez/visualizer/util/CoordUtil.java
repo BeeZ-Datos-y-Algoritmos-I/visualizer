@@ -1,4 +1,4 @@
-package util;
+package io.beez.visualizer.util;
 
 import javafx.geometry.Point3D;
 

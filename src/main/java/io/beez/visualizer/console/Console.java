@@ -1,15 +1,14 @@
-package console;
+package io.beez.visualizer.console;
 
-import analyzer.I3DAnalyzer;
-import analyzer.Simple3DAnalyzer;
-import config.Config;
-import javafx.scene.Scene;
+import io.beez.visualizer.analyzer.I3DAnalyzer;
+import io.beez.visualizer.analyzer.Simple3DAnalyzer;
+import io.beez.visualizer.config.Config;
 import javafx.stage.Stage;
-import scene.VisualizerAPI;
-import scene.VisualizerScene;
-import scene.bee.Bee;
+import io.beez.visualizer.scene.bee.Bee;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Date;
 import java.util.LinkedList;
 
@@ -30,7 +29,7 @@ public class Console {
         System.out.println("[ACCIÓN]: Generando entorno 3D...");
 
         Date date = makeDate();
-        bees = analyzer.make(false);
+        bees = analyzer.make(false, Files.readAllLines(new File(Config.FILES.get("input_path")).toPath()));
 
         System.out.println("[INFORMACIÓN]: Se ha generado en " + (makeDate().getTime() - date.getTime()) + " ms.");
         System.out.println("[ACCIÓN]: Mostrando ambiente...");

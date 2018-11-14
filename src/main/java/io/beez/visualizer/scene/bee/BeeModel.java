@@ -1,4 +1,4 @@
-package scene.bee;
+package io.beez.visualizer.scene.bee;
 
 import com.interactivemesh.jfx.importer.obj.ObjModelImporter;
 import javafx.scene.image.Image;

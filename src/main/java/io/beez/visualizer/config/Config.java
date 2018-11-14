@@ -1,4 +1,4 @@
-package config;
+package io.beez.visualizer.config;
 
 import org.ini4j.Ini;
 

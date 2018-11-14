@@ -1,6 +1,6 @@
-package scene;
+package io.beez.visualizer.scene;
 
-import console.Console;
+import io.beez.visualizer.console.Console;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -20,9 +20,9 @@ import javafx.scene.transform.Transform;
 import org.fxyz3d.geometry.Point3D;
 import org.fxyz3d.shapes.composites.PolyLine3D;
 import org.fxyz3d.utils.CameraTransformer;
-import scene.bee.Bee;
-import scene.zoom.AnimatedZoomOperator;
-import util.CoordUtil;
+import io.beez.visualizer.scene.bee.Bee;
+import io.beez.visualizer.scene.zoom.AnimatedZoomOperator;
+import io.beez.visualizer.util.CoordUtil;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
